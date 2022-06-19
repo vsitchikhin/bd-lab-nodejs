@@ -1,0 +1,27 @@
+// Crib for post and get requests
+/*
+* if (request.method === 'GET') {
+*   // GET
+*   console.log('server start successful');
+*   console.log(request.method);
+*   let urlRequest = url.parse(request.url, true);
+*   // console.log(urlRequest.query.test)
+*   if (urlRequest.query.test % 2 === 0) {
+*     response.end('ok')
+*   }
+*   response.end('not ok');
+* } else {
+*   // POST
+*   let body = '';
+*   request.on('data', chunk => {
+*     body += chunk.toString();
+*   });
+*   request.on('end', () => {
+*     body = JSON.parse(body)
+*     console.log(body.user);
+*     console.log(body.user_data);
+*     console.log(body.passport);
+*     response.end('ok');
+*   });
+* }
+*/

@@ -1,25 +1,19 @@
-require('dotenv').config();
-const mysql = require('mysql');
-const host = process.env.DB_HOST;
-const user = process.env.DB_USER;
-const base = process.env.DATABASE;
-const password = process.env.DB_PASSWORD;
+const createNewUser = require('./registration')
+const http = require('http');
+const url = require('url');
 
 
-// Config
-const  connection = mysql.createConnection({
-  host: host,
-  user: user,
-  database: base,
-  password: password,
-})
-
-// Connect
-connection.connect(err => {
-  if (err) {
-    console.log("The error: " + err + " occurred")
-    return err
-  } else {
-    console.log("Connection success")
+http.createServer((request, response) => {
+  let urlParts = url.parse(request.url, true)
+  if (request.method === 'GET') {
+    response.end('Hello');
+  } else if (request.method === 'POST') {
+    switch (urlParts.pathname) {
+      case "/signup": {
+        createNewUser(request, response)
+      }
+    }
   }
-})
+}).listen(4000);
+
+
