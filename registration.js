@@ -76,6 +76,10 @@ async function insertUserData(data, passport, connection, newUserId) {
 
 
 async function insertUserRole(data, teacher, connection, newUserId) {
+  teacher = teacher === undefined ? {} : teacher;
+
+  teacher.qualification = teacher?.qualification === undefined ? null : teacher.qualification;
+  teacher.institution = teacher?.institution === undefined ? null : teacher.institution;
   let queryInsertNewTeacher = `INSERT INTO logoped_users(logoped_id, qualification_document_url, institution)
                                VALUES (${newUserId}, "${teacher?.qualification}", "${teacher?.institution}");`;
   let queryInsertNewChild = `INSERT INTO child_users(child_id)
@@ -84,15 +88,15 @@ async function insertUserRole(data, teacher, connection, newUserId) {
                                VALUES (${newUserId});`;
 
   switch (data.account_type) {
-    case 1: {
+    case '1': {
       await connection.execute(queryInsertNewTeacher);
       break;
     }
-    case 2: {
+    case '2': {
       await connection.execute(queryInsertNewParent);
       break;
     }
-    case 3: {
+    case '3': {
       await connection.execute(queryInsertNewChild);
       break;
     }
