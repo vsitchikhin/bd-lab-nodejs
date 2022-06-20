@@ -1,7 +1,8 @@
-const createNewUser = require('./registration')
+const createNewUser = require('./registration');
+const autherisateUser = require('./autherisation');
 const http = require('http');
 const url = require('url');
-const cors = require('cors')
+const cors = require('cors');
 
 
 http.createServer((request, response) => {
@@ -12,11 +13,20 @@ http.createServer((request, response) => {
 
   let urlParts = url.parse(request.url, true)
   if (request.method === 'GET') {
-    response.end('Hello');
+    switch (urlParts.pathname) {
+      case "/login": {
+        const email = urlParts.query.email;
+        const password = urlParts.query.password
+
+        autherisateUser(request, response, email, password);
+        break;
+      }
+    }
   } else if (request.method === 'POST') {
     switch (urlParts.pathname) {
       case "/signup": {
-        createNewUser(request, response)
+        createNewUser(request, response);
+        break;
       }
     }
   }
