@@ -1,25 +1,25 @@
-require('dotenv').config();
-const mysql = require('mysql');
-const host = process.env.DB_HOST;
-const user = process.env.DB_USER;
-const base = process.env.DATABASE;
-const password = process.env.DB_PASSWORD;
+const createNewUser = require('./registration')
+const http = require('http');
+const url = require('url');
+const cors = require('cors')
 
 
-// Config
-const  connection = mysql.createConnection({
-  host: host,
-  user: user,
-  database: base,
-  password: password,
-})
+http.createServer((request, response) => {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Request-Method', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+  response.setHeader('Access-Control-Allow-Headers', '*');
 
-// Connect
-connection.connect(err => {
-  if (err) {
-    console.log("The error: " + err + " occurred")
-    return err
-  } else {
-    console.log("Connection success")
+  let urlParts = url.parse(request.url, true)
+  if (request.method === 'GET') {
+    response.end('Hello');
+  } else if (request.method === 'POST') {
+    switch (urlParts.pathname) {
+      case "/signup": {
+        createNewUser(request, response)
+      }
+    }
   }
-})
+}).listen(4000);
+
+
