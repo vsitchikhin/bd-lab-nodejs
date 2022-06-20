@@ -30,8 +30,8 @@ async function databaseQuery(user, data, passport, teacher, connection) {
   let newUserId = await getNewUserId(connection);
   newUserId = newUserId[0].users + 1;
 
-  if (isUserExists) {
-    return request.end('Пользователь с таким email или паспортными данными уже существует!')
+  if (!isUserExists) {
+    return console.log('Пользователь с таким email или паспортными данными уже существует!')
   } else {
     await createUser(user, connection, newUserId);
     await insertUserData(data, passport, connection, newUserId);
@@ -47,7 +47,7 @@ async function checkUserExists(data, passport, connection) {
 
   const [checkUser, userFields] = await connection.execute(queryCheckUserExists);
   const [checkPassport, passportFields] = await connection.execute(queryCheckUserPassportExists);
-  return checkUser[0].users_count !== 0 && checkPassport[0].passports_count !== 0;
+  return checkUser[0].users_count === 0 && checkPassport[0].passports_count === 0;
 }
 
 
