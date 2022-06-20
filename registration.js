@@ -12,10 +12,10 @@ module.exports = async function createNewUser(request, response) {
   });
   request.on('end', () => {
     body = JSON.parse(body);
-    let user = body.user;
-    let userData = body.user_data;
-    let passport = body.passport;
-    let logopedUser = body.logoped_data;
+    const user = body.user;
+    const userData = body.user_data;
+    const passport = body.passport;
+    const logopedUser = body.logoped_data;
     databaseQuery(user, userData, passport, logopedUser, connection);
   });
 
