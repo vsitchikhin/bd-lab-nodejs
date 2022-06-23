@@ -1,8 +1,13 @@
 const config = require('../config');
 const mysql = require('mysql2/promise');
 const newUser = require('../models/usersModel');
+const bcrypt = require('bcrypt');
+const dotenv = require('dotenv')
 
-module.exports = async function createNewUser(request, response, salt, bcrypt) {
+const salt = process.env.SALT
+
+
+module.exports = async function createNewUser(request, response) {
   const connection = await mysql.createConnection(config);
 
   let body = '';
@@ -24,11 +29,6 @@ module.exports = async function createNewUser(request, response, salt, bcrypt) {
 
     newUser.constructor(data);
     const res = await newUser.createUser(connection).then();
-
-    // И эти 2 тоже, но с теми двумя разные
-    const pass = await bcrypt.hash('12345', salt)
-    const pass2 = await bcrypt.hash('12345', salt)
-    console.log(pass, pass2)
 
     response.end(JSON.stringify(res));
   });

@@ -23,7 +23,7 @@ const authorizatedUser = {
     const isValidPassword = this.comparePasswords(userRows[0].password, this.password);
 
     if (isValidPassword) {
-      const session = this.getSession(userRows[0].user_id, connection);
+      const session = await this.getSession(userRows[0].user_id, connection);
       return {
         error: false,
         errorMessage: '',
@@ -42,31 +42,36 @@ const authorizatedUser = {
   },
 
   async getSession(id, connection) {
-    const session_id = uuid.v4();
-    const currentDate = new Date().toISOString().split('T');
-    let date = currentDate[0];
-    date = date + 14;
-    const time = currentDate[1];
-
-    const queryCheckSessionExists = `SELECT count(*) FROM user_sessions WHERE user_id = ${id}`;
     const queryGetSessionByUserId = `SELECT * FROM user_sessions WHERE user_id = ${id}`
+
+    const isSessionExists = await this.checkSessionExists(id, connection);
+
+    if (isSessionExists) {
+      const [sessionRows, sessionFields] = await connection.execute(queryGetSessionByUserId);
+      return sessionRows
+    }
+
+    await this.createSession(id, connection);
+    const [sessionRows, sessionFields] = await connection.execute(queryGetSessionByUserId);
+    return sessionRows[0]
+  },
+
+  async createSession(id, connection) {
+    const currentDate = new Date().toISOString().split('T');
+    const date = currentDate[0];
+    let time = currentDate[1];
+    time = time.slice(0, -5)
+    const session_id = uuid.v4();
     const queryCreateSession = `INSERT INTO user_sessions(session_id, user_id, end_date)
                             VALUES("${session_id}", ${id}, "${date + ' ' + time}")`;
 
-    const checkSessionExists = await connection.execute(queryCheckSessionExists)
-    if (checkSessionExists.length > 0) {
-      const [sessionRows, sessionFields] = await connection.execute(queryGetSessionByUserId);
-      return {
-        sessionRows,
-      }
-    }
-
     await connection.execute(queryCreateSession);
-    const [sessionRows, sessionFields] = await connection.execute(queryGetSessionByUserId);
+  },
 
-    return {
-      sessionRows,
-    }
+  async checkSessionExists(id, connection) {
+    const queryCheckSessionExists = `SELECT count(*) AS sessions FROM user_sessions WHERE user_id = ${id}`;
+    const [checkSessionRows, checkSessionFields] = await connection.execute(queryCheckSessionExists);
+    return checkSessionRows[0].sessions > 0
   }
 }
 

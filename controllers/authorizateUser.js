@@ -1,8 +1,13 @@
 const config = require('../config');
 const mysql = require('mysql2/promise');
 const authorisation = require('../models/sessionsModel');
+const bcrypt = require('bcrypt');
+const dotenv = require('dotenv')
 
-module.exports = async function authorizateUser(request, response, salt, bcrypt) {
+const salt = process.env.SALT
+
+
+module.exports = async function authorizateUser(request, response) {
   const connection = await mysql.createConnection(config);
 
   let body = '';
@@ -16,11 +21,6 @@ module.exports = async function authorizateUser(request, response, salt, bcrypt)
 
     authorisation.constructor(body);
     const res = await authorisation.getUserByEmail(connection);
-
-    // Эти 2 одинаковые
-    const pass = await bcrypt.hash('12345', salt)
-    const pass2 = await bcrypt.hash('12345', salt)
-    console.log(pass, pass2)
 
     response.end(JSON.stringify(res));
   });
