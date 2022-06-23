@@ -57,9 +57,12 @@ const authorizatedUser = {
   },
 
   async createSession(id, connection) {
-    const currentDate = new Date().toISOString().split('T');
-    const date = currentDate[0];
-    let time = currentDate[1];
+    let currDate = new Date();
+    currDate.setMonth(currDate.getMonth() + 1)
+    currDate = currDate.toISOString().split('T')
+
+    const date = currDate[0];
+    let time = currDate[1];
     time = time.slice(0, -5)
     const session_id = uuid.v4();
     const queryCreateSession = `INSERT INTO user_sessions(session_id, user_id, end_date)
