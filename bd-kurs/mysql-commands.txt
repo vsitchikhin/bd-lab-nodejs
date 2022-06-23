@@ -1,0 +1,873 @@
+-- Лабораторная работа №3
+
+create table new_table(
+    id_column integer not null auto_increment, 
+    column_text varchar(255),
+    column_date date,
+    column_date_time datetime,
+    column_float float,
+    column_boolean boolean,
+    primary key (id_column)
+);
+
+-- Восстановление столбцов в таблицах, удаленных на лабораторной работе
+
+alter table users
+add patronymic varchar(255);
+
+alter table user_data
+add subdivision_code varchar(7) NULL, issue_date date NULL;
+
+alter table user_activities
+drop column activity_date;
+
+-- Переименовывание таблиц
+alter table store rename products;
+
+rename table users to user;
+
+alter table new_table
+rename column column_text to column_1;
+
+rename table new_table to smth_name_to_table
+
+-- Удаление таблицы
+drop table smth_name_to_table;
+
+-- Заполнение таблиц
+
+insert into users (name, surname, patronymic, email, password, user_address)
+values  ('Vladimir', 'Sitchikhin', 'Eugenievich', 'vladimir@ex.com', '123qwe', NULL), 
+        ('Yuri', 'Antonov', 'Petrovich', 'yuri@ex.com', '123qwe', NULL),
+        ('Andrei', 'Inguschetov', NULL, 'anding@example.com', 'anding25', NULL),
+        ('Maria', 'Chergova', 'Stasovna', 'maria@ex.ru', NULL),
+        ('Viktoria', 'Perceva', 'Grigorievna', 'victory@ex.com', NULL),
+        ('Ioan', 'Chardonsky', 'Nikolaevich', 'ioan@ex.ru', 'ioan123', NULL);
+
+insert into user_data (user_id, passport_numbers, passport_organ, subdivision_code, issue_date)
+values  (1, 1857121198, 'GU MVD of Russia', '325-150', '2005-03-12'),
+        (2, 1942646930, 'GU MVD of Russia', '145-123', '2018-12-10'),
+        (3, 1245165263, 'GU MVD of Russia', '632-764', '1995-02-27'),
+        (4, 6234521342, 'GU MVD of Russia', '733-124', '1979-06-16'),
+        (5, 2345123453, 'GU MVD of Russia', '235-513', '2001-12-19'),
+        (6, 1351623456, 'GU MVD of Russia', '124-062', '2020-08-26');
+
+insert into store (product_name, product_type, image_url, description)
+values  ('Year subscribe', 'subscribe', NULL, 'Subscribe for user on the year to our service'),
+        ('Month subscribe', 'subscribe', NULL, 'Subscribe for user on the MONTH to our service'),
+        ('Player skin', 'purchase', 'https://smth/img/url', 'Skin for user account or user agent');
+
+insert into purchases (user_id, product_id, action_start, action_end)
+values  (1, 2, '2022-03-15 21:04:30', '2022-04-15 21:04:30'),
+        (2, 3, '2022-05-19 21:04:30', NULL),
+        (3, 1, '2022-07-27 21:04:30', '2023-07-27 21:04:30'),
+        (4, 3, '2020-09-03 21:04:30', NULL),
+        (5, 1, '2021-09-03 21:04:30', '2022-09-03 21:04:30'),
+        (6, 2, '2015-04-07 21:04:30', '2015-05-07 21:04:30');
+
+insert into user_activities (activity_name, page_url, activity_type)
+values  ('Log in', '/auth/login', 'authorisation user in system'),
+        ('Sign up', '/auth/signup', 'signing up user in system'),
+        ('Buy subscription', '/store/subscribe/{subscribe-id}', 'buying subscription on system'),
+        ('Buy skin', 'store/skins/{skin-id}', 'buying skin for user');
+
+insert into history (user_id, activity_id)
+values  (1, 1),
+        (2, 1),
+        (3, 4),
+        (5, 2),
+        (6, 3),
+        (4, 4),
+        (3, 2);
+
+-- Следующая команда была выполнена отдельно от остальных
+drop database my_database;
+
+
+-- мода
+-- в покупку может входить множество продуктов
+-- дефолтное значение на старт действия покупки - current_date
+-- дата конца подписки всегда больше даты начала или null
+-- user_activity к пользователю не многие ко многим а один ко многим
+
+drop table purchases;
+
+create table new_table(
+    id_column integer not null auto_increment, 
+    column_text varchar(255),
+    column_date date,
+    column_date_time datetime,
+    column_float float,
+    column_boolean boolean,
+    primary key (id_column)
+);
+
+create table purchases(
+    purchase_id integer not null auto_increment,
+    user_id integer,
+    action_start datetime default current_timestamp,
+    action_end datetime default null,
+    constraint action_end check (action_end = null or action_end > action_start),
+    primary key (purchase_id),
+    foreign key (user_id) references users(user_id)
+);
+
+create table purchase(
+    id integer not null auto_increment,
+    purchase_id integer,
+    product_id integer,
+    buy_date datetime,
+    primary key (id),
+    foreign key (purchase_id) references purchases(purchase_id),
+    foreign key (product_id) references store(product_id)
+);
+
+drop table history;
+
+alter table user_activities
+add user_id integer,
+add foreign key (user_id) references users(user_id);
+
+
+
+
+-- Лабораторная работа №4
+
+-- UPDATE В разных таблицах:
+update users
+set name='Ирина',
+    surname='Сталь',
+    patronymic='Вячеславовна',
+    birth_date='2000-05-26'
+where user_id=10;
+
+update group_remote_lessons
+set lesson_theme='Постановка звука "Л"'
+where lesson_id=2;
+
+update group_remote_lessons
+set lesson_theme='Постановка шипящих звуков'
+where lesson_id=5;
+
+update logoped_users
+set qualification_document_url='https://diploma/vspu/{img-id}'
+where logoped_id=12;
+
+update passport
+set passport_numbers=1812956034,
+    issue_date='2010-03-22'
+where user_id=10;
+
+-- DELETE В разных таблицах
+delete from store where price<400;
+
+delete from children_groups where group_rating=null;
+
+delete from user_activities where activity_type='Вход';
+
+delete from logoped_created_lessons where difficult>8;
+
+delete from enrollment_in_group where enter_date='2022-05-26 22:05:30';
+
+-- SELECT, DISTINCT, WHERE, AND/OR/NOT, IN, BETWEEN, IS NULL, AS
+select distinct user_id, name, surname from users;
+
+select * from passport
+where passport_organ like 'ГУ%';
+
+select * from passport
+where passport_organ not like 'ГУ%';
+
+select * from users
+where name like '%ва%' and surname like '%ов%';
+
+select * from store
+where price>1000 or price<500;
+
+select * from logoped_users
+where institution in('ВолгГМУ');
+
+select * from store
+where price between 500 and 1000;
+
+select * from passport
+where date(issue_date)>'2022-05-05';
+
+select * from passport
+where passport_numbers>1816140000;
+
+select * from purchases
+where action_end is null;
+
+select * from users
+where user_id as logoped_users.logoped_id;
+
+select 1+'1';
+
+select * from users
+where patronymic is null;
+
+select * from logoped_created_lessons
+where type like 'Урок' and (difficult>6 or difficult<3);
+
+-- SELECT INTO / INSERT SELECT
+-- Создание таблиц для копирования в неё данных
+create table for_select_into_pasport(
+    id_column integer not null auto_increment, 
+    column_organ varchar(255),
+    column_numbers integer,
+    column_issue_date date,
+    column_code varchar (10),
+    primary key (id_column)
+);
+
+create table for_select_into_users(
+    id_column integer not null auto_increment,
+    column_name varchar(255) not null,
+    column_surname varchar(255) not null,
+    column_patronymic varchar(255),
+    column_birth_date date,
+    primary key (id_column)
+);
+
+create table for_select_into_store(
+    product_id_column integer not null auto_increment,
+    column_price integer,
+    column_type varchar(255),
+    column_privileges json,
+    primary key (product_id_column)
+);
+
+-- Сами запросы
+insert into for_select_into_users
+select * from users;
+
+insert into for_select_into_pasport
+select user_id, passport_organ, passport_numbers, issue_date, subdivision_code 
+from passport;
+
+insert into for_select_into_store
+select * from store;
+
+-- LIKE
+select user_id, name
+from users
+where surname like '%ва%';
+
+select email, account_type
+from user_data
+where password like '_i%a%';
+
+select user_id, passport_organ, passport_numbers
+from passport
+where passport_organ like '_У%';
+
+select lesson_theme, group_id, logoped_id
+from group_remote_lessons
+where lesson_theme like '%ш%';
+
+select logoped_id, institution
+from logoped_users
+where institution like '_____';
+
+-- JOIN
+select * from users
+join user_data on user_data.user_id=users.user_id;
+
+select * from passport
+inner join user_data using(user_id);
+
+select * from child_users
+cross join enrollment_in_group using(child_id);
+
+select * from store
+left join purchases using(product_id);
+
+select * from purchases
+right join users using(user_id);
+
+select * from logoped_created_lessons
+cross join logoped_users using(logoped_id);
+
+select * from group_remote_lessons
+join children_groups on children_groups.group_id=group_remote_lessons.group_id;
+
+select * from children_groups
+join logoped_users on logoped_users.logoped_id=children_groups.logoped_id;
+
+select * from parent_users
+inner join applications using(parent_id);
+
+select * from logoped_users
+cross join applications using(logoped_id);
+
+select * from completed_lessons
+left join logoped_created_lessons using(lesson_id);
+
+select * from completed_lessons
+right join child_users using(child_id);
+
+select * from purchases
+cross join users using(user_id);
+
+select * from user_activities
+join history on history.activity_id=user_activities.activity_id;
+
+-- GROUP BY
+select name, count(name) from users
+group by name
+order by count(name) asc;
+
+select price from store
+group by price
+order by price desc;
+
+select rating, count(rating) from child_users
+group by rating
+having count(rating)>1;
+
+select price, max(price) from store
+group by price;
+
+select product_id, sum(price) from store
+group by product_id
+order by sum(price) asc;
+
+select child_id, sum(rating), count(rating) from child_users
+group by child_id
+having sum(rating)>10
+order by sum(rating) desc;
+
+select activity_id, sum(activity_id), 
+min(user_id), avg(activity_id) from history
+group by count(activity_id)
+order by count(activity_id) desc;
+
+select product_id, count(product_id) from purchases
+group by count(product_id)
+order by count(product_id) desc;
+
+select action_end, min(action_end) from purchases
+group by action_end;
+
+select institution, count(institution), sum(institution) from logoped_users
+group by sum(institution)
+order by count(institution) desc;
+
+select account_type, sum(account_type), count(account_type) from user_data
+group by count(account_type)
+order by count(account_type) asc;
+
+select type, count(type), sum(type), avg(type) from logoped_created_lessons
+group by count(type)
+order by count(type) desc;
+
+-- UNION, EXCEPT, INTERSECT
+select user_id, email from user_data
+where account_type=1
+union
+select logoped_id, institution from logoped_users;
+
+select product_id, type from store
+union
+select user_id, action_start from purchases;
+
+select group_id, logoped_id from children_groups
+where group_rating>0
+union 
+select child_id, rating from child_users
+where rating>20;
+
+-- GROUP_CONCAT
+select group_concat(name) as user_name from users;
+
+select group_concat(type) as product_data from store;
+
+select group_concat(institution) as VUZ from logoped_users;
+
+
+-- Запросы с WITH
+with cte_users as (
+    select * from users
+)
+select * from cte_users;
+
+with cte_passport as (
+    select * from passport
+)
+select passport_numbers, passport_organ, user_id
+from cte_passport;
+
+-- Вложенные SELECT
+select user_id, name, surname from users
+where user_id>all(
+    select logoped_id from logoped_users
+    where logoped_id=user_id
+);
+
+select logoped_id, institution from logoped_users
+where logoped_id=any(
+    select user_id from users
+    where user_id=logoped_id
+);
+
+select * from purchases
+where exists(
+    select product_id from store
+    where user_id=6
+);
+
+-- Разные функции СУБД
+select concat('Иван', ' ', 'Анатольев');
+
+select ltrim('        VSTU');
+
+select locate('m', 'Tom Mentoth');
+
+select now();
+
+select sysdate();
+
+select current_time();
+
+select dayofyear('2022-05-23');
+
+select 1 + 2;
+
+select 120 * 234;
+
+select 123 % 14;
+
+-- Функциональные требования:
+-- 1. Подсчет количества пользователей определенного типа
+select account_type, count(account_type) from user_data
+group by account_type;
+
+-- 2. Рассчет возраста пользователя
+select name, birth_date, 
+(year(current_date) - year(birth_date)) as 'age'
+from users
+order by name;
+
+-- 3. Расчет оставшегося времени доступа к определенному ресурсу
+select user_id, product_id, action_end,
+(year(action_end) - year(current_date)) * 12 + (month(action_end) - month(current_date)) + (day(action_end) - day(current_date)) / 12
+as 'access_time_left'
+from purchases
+where action_end>current_date or action_end=current_date
+order by access_time_left desc;
+
+-- 4. Расчет тройки лучших учеников
+select child_id, max(rating) as 'rating'
+from child_users
+inner join users on users.user_id=child_users.child_id
+group by child_id
+order by max(rating) desc
+limit 3;
+
+-- 5. Количество заявок у определенного преподавателя
+select logoped_id, count(logoped_id) from applications
+group by logoped_id
+order by count(logoped_id) asc;
+
+-- 6. Паспортные данные определенного пользователя
+select * from users
+left join passport using(user_id)
+where user_id=10;
+
+-- 7. Уроки созданные определенным преподавателем
+select * from logoped_created_lessons
+where logoped_id=10;
+
+-- 8. Типы и сложность уроков
+select type, difficult from logoped_created_lessons;
+
+-- 9. Тип пользователя
+select account_type from user_data
+where user_id=7;
+
+-- 10. История определенного пользователя
+select * from history
+where user_id=1;
+
+
+-- Сложные запросы
+select * from users
+join user_data on user_data.user_id = users.user_id
+join passport on passport.user_id = users.user_id
+where users.name like '%в%'
+
+select * from users
+join child_users on child_users.child_id = users.user_id
+join completed_lessons on completed_lessons.child_id = child_users.child_id
+
+select * from history
+join user_activities on user_activities.activity_id = history.activity_id
+join users on users.user_id = history.user_id
+
+select * from purchases
+join users on users.user_id = purchases.user_id
+join store on store.product_id = purchases.product_id
+where purchases.product_id = 5
+
+select * from logoped_users
+join logoped_created_lessons on logoped_created_lessons.logoped_id = logoped_users.logoped_id
+join completed_lessons on completed_lessons.lesson_id = logoped_created_lessons.lesson_id
+join child_users on child_users.child_id = completed_lessons.child_id
+where child_users.rating > 10
+
+
+-- мода
+-- топ 3 логопеда, к которым записалось больше всего детей
+-- для заданного логопеда по имени вывести среднюю оценку всех его уроков
+-- для каждого логопеда вывести сводную инфу (group concat) о всех его группах:
+-- группа (фамилии детей).
+
+select name, surname, patronymic, count(logoped_id) as children_count from child_users
+join users on logoped_id = user_id
+group by logoped_id
+order by count(logoped_id) desc
+limit 3;
+
+
+select name, surname, avg(rate) as "Средний рейтинг" from completed_lessons
+join logoped_created_lessons on logoped_created_lessons.lesson_id = completed_lessons.lesson_id
+join users on logoped_id = user_id
+where name like 'Ирина'
+group by logoped_id
+order by avg(rate) desc;
+
+select logoped_id, enrollment_in_group.`group_id`, group_concat(surname) as "Фамилии детей"
+from enrollment_in_group
+join children_groups on children_groups.group_id = enrollment_in_group.group_id
+join users on users.user_id = enrollment_in_group.child_id
+group by enrollment_in_group.`group_id`;
+
+
+
+
+-- Лабораторная работа № 5
+
+-- Заполнение таблицы данными из csv файла
+load data infile '/var/lib/mysql-files/chat.csv'
+    into table chat
+    fields TERMINATED by ','
+    ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 rows;
+
+load data infile '/home/vladimir/Downloads/csvs/users.csv'
+    into table users
+    fields TERMINATED by ','
+    ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 rows;
+
+
+-- Обновление данных в таблице
+update *table_name* set 
+    *column_name* = (
+        select *column_name* from *table_name* where *table_name*.*column_name* = *table_name*.*column_name*
+        order by rand() limit 1
+    ),
+
+
+-- Заполнение таблицы данными из существующих таблиц
+insert into *table_name* (*[table_columns]*) values
+    select *column_name* from *table_name* where *table_name*.*column_name* = *table_name*.*column_name*
+    order by rand() limit 1
+
+
+-- Сложные запросы
+-- По логопеду средний рейтинг его уроков
+-- 0.0037
+select name, surname, avg(rate) as "Средний рейтинг" from completed_lessons
+join logoped_created_lessons on logoped_created_lessons.lesson_id = completed_lessons.lesson_id
+join users on logoped_id = user_id
+where name like 'Ирина'
+group by logoped_id
+order by avg(rate) desc;
+
+
+-- Топ 3 ребенка по рейтингу
+-- 0.0024
+-- индексы:
+select child_id, max(rating) as 'rating'
+from child_users
+inner join users on users.user_id=child_users.child_id
+group by child_id
+order by max(rating) desc
+limit 3;
+
+
+-- Топ 5 логопедов по кол-ву предложений
+-- 0.0043
+-- индексы:
+select name, surname, patronymic, count(logoped_id) as "Количество предложений" from applications
+join users on logoped_id = user_id
+group by logoped_id
+order by count(logoped_id) desc
+limit 5;
+
+
+-- Кол-во пользователей по возрастам, сами пользователи и их возраста
+-- 0.0088
+-- индексы:
+select count(users.user_id) as "Кол-во пользователей", group_concat(name) as "Имя", 
+group_concat(surname) as "Фамилия", group_concat(patronymic) as "Отчество",
+(year(current_date) - year(birth_date)) as "Возраст", group_concat(account_type) as "Тип аккаунта" from users
+join passport on passport.user_id = users.user_id
+join user_data on user_data.user_id = users.user_id
+group by (year(current_date) - year(birth_date))
+order by (year(current_date) - year(birth_date)) desc;
+
+
+-- Кол-во пользователей старше 40 или младше 20
+-- 0.0071
+-- индексы:
+select count(users.user_id) as "Кол-во пользователей", group_concat(name) as "Имя", 
+group_concat(surname) as "Фамилия", group_concat(patronymic) as "Отчество",
+(year(current_date) - year(birth_date)) as "Возраст", group_concat(account_type) as "Тип аккаунта" from users
+join passport on passport.user_id = users.user_id
+join user_data on user_data.user_id = users.user_id
+where (year(current_date) - year(birth_date)) > 40 or (year(current_date) - year(birth_date)) < 20
+group by (year(current_date) - year(birth_date))
+order by (year(current_date) - year(birth_date)) desc;
+
+
+-- Индексы
+
+-- Индексирование возраста пользователей в таблице users:
+-- Выбран B-Tree индекс
+alter table users add index age (birth_date);
+
+-- Индексирование оценок детей
+-- Выбран B-Tree индекс
+alter table child_users add index rate (rate);
+
+-- Индексирование предложений логопедам
+-- Выбран B-Tree индекс
+alter table applications add index application_to (logoped_id);
+
+-- Индексирование средней оценки за урок
+-- Выбран B-Tree индекс
+alter table logoped_created_lessons add index average_rate (rate, logoped_id);
+
+
+-- Индексирование уроков
+-- Выбран B-Tree индекс
+alter table logoped_created_lessons add index logoped_lesson (logoped_id, lesson_id);
+
+-- Индексирование оценок
+-- Выбран B-Tree индекс
+alter table completed_lessons add index rate_lesson (rate, lesson_id);
+
+-- Индексирование типа аккаунта
+-- Выбран B-Tree индекс
+alter table user_data add index account (account_type);
+
+
+-- Запросы с индексами
+-- 0.002
+select name, surname, avg(rate) as "Средний рейтинг" from completed_lessons
+join logoped_created_lessons on logoped_created_lessons.lesson_id = completed_lessons.lesson_id
+join users on logoped_id = user_id
+where name like 'Ирина'
+group by logoped_id
+order by avg(rate) desc;
+
+-- 0.0016
+select child_id, max(rating) as 'rating'
+from child_users
+inner join users on users.user_id=child_users.child_id
+group by child_id
+order by max(rating) desc
+limit 3;
+
+-- 0.003
+select name, surname, patronymic, count(logoped_id) as "Количество предложений" from applications
+join users on logoped_id = user_id
+group by logoped_id
+order by count(logoped_id) desc
+limit 5;
+
+-- 0.0043
+select count(users.user_id) as "Кол-во пользователей", group_concat(name) as "Имя", 
+group_concat(surname) as "Фамилия", group_concat(patronymic) as "Отчество",
+(year(current_date) - year(birth_date)) as "Возраст", group_concat(account_type) as "Тип аккаунта" from users
+join passport on passport.user_id = users.user_id
+join user_data on user_data.user_id = users.user_id
+group by (year(current_date) - year(birth_date))
+order by (year(current_date) - year(birth_date)) desc;
+
+-- 0.0038
+select count(users.user_id) as "Кол-во пользователей", group_concat(name) as "Имя", 
+group_concat(surname) as "Фамилия", group_concat(patronymic) as "Отчество",
+(year(current_date) - year(birth_date)) as "Возраст", group_concat(account_type) as "Тип аккаунта" from users
+join passport on passport.user_id = users.user_id
+join user_data on user_data.user_id = users.user_id
+where (year(current_date) - year(birth_date)) > 40 or (year(current_date) - year(birth_date)) < 20
+group by (year(current_date) - year(birth_date))
+order by (year(current_date) - year(birth_date)) desc;
+
+
+-- Процедуры
+-- Запись ребенка в группу
+delimiter $$
+create procedure enroll_child_in_group(in kid_id int, in id_group int, in in_date datetime, in out_date datetime)
+begin
+	insert into enrollment_in_group(child_id, group_id, enter_date, exit_date)
+    values (kid_id, id_group, in_date, out_date);
+end$$
+delimiter ;
+
+
+-- Расчет возраста пользователя
+delimiter $$
+create procedure get_user_age(in curr_date date, in birthday date, out age int)
+begin
+    set age = if ((month(curr_date) - month(birthday) < 0), year(curr_date) - year(birthday) - 1, year(curr_date) - year(birthday));
+    set age = if ((day(curr_date) - day(birthday) < 0) and (month(curr_date) - month(birthday) > 0), age - 1, age);
+end$$
+delimiter ;
+
+
+-- Обновления возраста пользователя
+alter table users
+add user_age integer(3) null;
+
+delimiter $$
+create procedure set_user_age(in id int)
+begin
+    select birth_date into @birthday from users
+    where user_id = id;
+
+    call get_user_age(current_date, @birthday, @age);
+
+    update users
+    set user_age = @age
+    where user_id = id;
+end$$
+delimiter ;
+
+
+-- Обновление возрастов всех пользователей
+delimiter $$
+create procedure update_users_age()
+begin
+    declare i int;
+    select count(*) into i from users;
+    
+    set_age: loop
+        call set_user_age(i);
+        set i = i - 1;
+        if i > 0 then
+            iterate set_age;
+        end if;
+        leave set_age;
+    end loop set_age;
+
+end$$
+delimiter ;
+
+
+-- Получение топ n детей по рейтингу
+delimiter $$
+create procedure get_children_top(in limit_count int)
+begin
+
+    select child_id as 'children', max(rating) as 'rating'
+    from child_users
+    inner join users on users.user_id=child_users.child_id
+    group by child_id
+    order by max(rating) desc
+    limit limit_count;
+
+end$$
+delimiter ;
+
+
+-- Обновление рейтинга ребенка
+delimiter $$
+create procedure update_child_rating(in kid_id int)
+begin
+    select sum(rate) as 'Общий рейтинг' into @rating
+    from completed_lessons
+    where child_id = kid_id;
+
+    update child_users
+    set rating = @rating
+    where child_id = kid_id;
+end$$
+delimiter ;
+
+
+-- Обновление рейтинга всех детей
+delimiter $$
+create procedure update_children_rating()
+begin
+
+    declare i int;
+    set @last_updated = 0;
+    select count(*) into i 
+    from user_data 
+    where account_type = 3;
+
+    set_rating: loop
+        select user_id
+        into @last_updated
+        from user_data
+        where account_type = 3 and @last_updated < user_id
+        limit 1;
+
+        call update_child_rating(@last_updated);
+        set i = i - 1;
+        if i > 0 then
+            iterate set_rating;
+        end if;
+        leave set_rating;
+    end loop set_rating;
+
+end$$
+delimiter ;
+
+
+-- Представления
+create view full_users_info as
+select * from users
+inner join user_data using(user_id)
+inner join passport using(user_id);
+
+select * from full_users_info;
+
+
+create view full_lessons_info as
+select * from logoped_users
+inner join logoped_created_lessons using(logoped_id)
+inner join lesson_additional_materials using(lesson_id)
+inner join lesson_materials using(material_id);
+
+select * from full_lessons_info;
+
+
+create view children_groups_info as
+select group_id, group_rating, child_id,
+    enter_date, exit_date, children_groups.logoped_id,
+    next_lesson_date, lesson_id, lesson_content,
+    lesson_theme
+    from children_groups
+inner join enrollment_in_group using(group_id)
+inner join group_remote_lessons using(group_id);
+
+select * from children_groups_info;
+
+-- Триггеры
+delimiter $$
+create trigger update_rating
+after insert
+on completed_lessons
+for each row
+begin
+call update_children_rating();
+end$$
+delimiter ;
